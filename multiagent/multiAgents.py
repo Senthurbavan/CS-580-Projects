@@ -149,6 +149,53 @@ class MinimaxAgent(MultiAgentSearchAgent):
         Returns whether or not the game state is a losing state
         """
         "*** YOUR CODE HERE ***"
+        def value(gs, agentId, depth):
+            # print("value, agent: %d, depth: %d"%(agentId, depth))
+            if gs.isWin() or gs.isLose() or depth==0:
+                # print("Terminal State")
+                return (self.evaluationFunction(gs), None)
+            
+            if agentId == 0:
+                return max_value(gs, agentId, depth)
+            elif agentId <= gs.getNumAgents() - 1:
+                return min_value(gs, agentId, depth)
+
+        def max_value(gs, agentId, depth):
+            # print("max-value, agent: %d, depth: %d"%(agentId, depth))
+            v = -float("inf")
+            max_a = None
+
+            for action in gs.getLegalActions(agentId):
+                new_gs = gs.generateSuccessor(agentId, action)
+                new_v,_ = value(new_gs, 1, depth)
+                if new_v > v:
+                    v = new_v
+                    max_a = action
+            return v, max_a
+        
+        def min_value(gs, agentId, depth):
+            # print("min-value, agent: %d, depth: %d"%(agentId, depth))
+            v = float("inf")
+            min_a = None
+            lastGhostId = gs.getNumAgents() - 1
+
+            for action in gs.getLegalActions(agentId):
+                new_gs = gs.generateSuccessor(agentId, action)
+
+                if agentId < lastGhostId:
+                    new_v,_ = value(new_gs, agentId+1, depth)
+                elif agentId == lastGhostId:
+                    new_v,_ = value(new_gs, 0, depth-1)
+                else:
+                    new_v = float("inf") # This should not happen
+                
+                if new_v < v:
+                    v = new_v
+                    min_a = action
+            return v, min_a
+        
+        _, max_action = value(gameState, 0, self.depth)
+        return max_action
         util.raiseNotDefined()
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
