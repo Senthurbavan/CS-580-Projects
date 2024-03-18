@@ -205,4 +205,57 @@ class PrioritizedSweepingValueIterationAgent(AsynchronousValueIterationAgent):
 
     def runValueIteration(self):
         "*** YOUR CODE HERE ***"
+        states = self.mdp.getStates()
+        predecessors = {}
+        pq = util.PriorityQueue()
+        for state in states:
+            if self.mdp.isTerminal(state):
+                continue
+            actions = self.mdp.getPossibleActions(state)
+            maxValue = -float("inf")
+            for action in actions:
+                val = 0
+                for nextState, p in self.mdp.getTransitionStatesAndProbs(state, action):
+                    if p > 0:
+                        if nextState in predecessors:
+                            predecessors[nextState].add(state)
+                        else:
+                            predecessors[nextState] = {state}
+                    r = self.mdp.getReward(state, action, nextState) + \
+                        self.discount * self.values[nextState]
+                    val += p * r
+                maxValue = max(val, maxValue)
+            absDiff = abs(maxValue - self.values[state])
+            pq.push(state, -absDiff)
 
+        for i in range(self.iterations):
+            if pq.isEmpty():
+                break
+            state = pq.pop()
+            if self.mdp.isTerminal(state):
+                continue  # don't update, keep it 0 to be consistent
+            actions = self.mdp.getPossibleActions(state)
+            maxValue = -float("inf")
+            for action in actions:
+                val = 0
+                nextStates = self.mdp.getTransitionStatesAndProbs(state, action)
+                for nextState, prob in nextStates:
+                    r = self.mdp.getReward(state, action, nextState) + \
+                        self.discount * self.values[nextState]
+                    val += prob * r
+                maxValue = max(val, maxValue)
+            self.values[state] = maxValue
+            for predState in predecessors[state]:
+                actions = self.mdp.getPossibleActions(predState)
+                maxValue = -float("inf")
+                for action in actions:
+                    val = 0
+                    nextStates = self.mdp.getTransitionStatesAndProbs(predState, action)
+                    for nextState, prob in nextStates:
+                        r = self.mdp.getReward(predState, action, nextState) + \
+                            self.discount * self.values[nextState]
+                        val += prob * r
+                    maxValue = max(val, maxValue)
+                absDiff = abs(maxValue - self.values[predState])
+                if absDiff > self.theta:
+                    pq.update(predState, -absDiff)
