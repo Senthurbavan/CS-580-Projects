@@ -44,6 +44,7 @@ class QLearningAgent(ReinforcementAgent):
 
         "*** YOUR CODE HERE ***"
         self.qValues = util.Counter()
+        print("learning rate: %f, epsilon: %f" % (self.alpha, self.epsilon))
 
     def getQValue(self, state, action):
         """
