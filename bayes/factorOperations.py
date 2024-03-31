@@ -102,6 +102,7 @@ def joinFactors(factors):
 
 
     "*** YOUR CODE HERE ***"
+    if not factors: return Factor([], [], {})
     setsOfUnconditioned = [set(factor.unconditionedVariables()) for factor in factors]
     setsOfConditioned = [set(factor.conditionedVariables()) for factor in factors]
 
@@ -254,6 +255,8 @@ def normalize(factor):
     valsum = 0
     for assignment in factor.getAllPossibleAssignmentDicts():
         valsum += factor.getProbability(assignment)
+
+    if valsum == 0: return None
 
     newFactor = Factor(newUnConditionedVariables, conditionedVariables, variableDomainsDict)
 
