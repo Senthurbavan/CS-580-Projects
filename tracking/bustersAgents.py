@@ -144,3 +144,10 @@ class GreedyBustersAgent(BustersAgent):
             [beliefs for i, beliefs in enumerate(self.ghostBeliefs)
              if livingGhosts[i+1]]
         "*** YOUR CODE HERE ***"
+        livingGhostsMLP = [b.argMax() for b in livingGhostPositionDistributions]
+        livingGhostsMLP.sort(key=lambda x: self.distancer.getDistance(x, pacmanPosition))
+        closestLivingGhostPos = livingGhostsMLP[0]
+        legal.sort(key=lambda a:
+                   self.distancer.getDistance(closestLivingGhostPos,
+                                              Actions.getSuccessor(pacmanPosition, a)))
+        return legal[0]
