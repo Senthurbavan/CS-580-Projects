@@ -374,14 +374,16 @@ class ParticleFilter(InferenceModule):
         "*** YOUR CODE HERE ***"
         pacmanPos = gameState.getPacmanPosition()
         jailPos = self.getJailPosition()
-        beliefDist = self.getBeliefDistribution()
-        for pos in self.legalPositions:
-            beliefDist[pos] *= self.getObservationProb(observation, pacmanPos,
+
+        newBeliefs = DiscreteDistribution()
+        for pos in self.particles:
+            newBeliefs[pos] += self.getObservationProb(observation, pacmanPos,
                                                        pos, jailPos)
-        if beliefDist.total() == 0:
+        newBeliefs.normalize()
+        if newBeliefs.total() == 0:
             self.initializeUniformly(gameState)
         else:
-            self.particles = [beliefDist.sample() for _ in range(self.numParticles)]
+            self.particles = [newBeliefs.sample() for _ in range(self.numParticles)]
 
         # raiseNotDefined()
 
@@ -391,7 +393,12 @@ class ParticleFilter(InferenceModule):
         gameState.
         """
         "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        newParticles = []
+        for oldPos in self.particles:
+            newPosDist = self.getPositionDistribution(gameState, oldPos)
+            newParticles.append(newPosDist.sample())
+        self.particles = newParticles
+        # raiseNotDefined()
 
     def getBeliefDistribution(self):
         """
@@ -404,7 +411,8 @@ class ParticleFilter(InferenceModule):
         "*** YOUR CODE HERE ***"
         beliefs = DiscreteDistribution()
         for particlePos in self.particles:
-            beliefs[particlePos] += 1/self.numParticles
+            beliefs[particlePos] += 1
+        beliefs.normalize()
         return beliefs
         # raiseNotDefined()
 
