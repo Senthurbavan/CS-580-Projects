@@ -78,7 +78,26 @@ def enhancedFeatureExtractorDigit(datum):
     features =  basicFeatureExtractorDigit(datum)
 
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    emptyPixels = [x for x in features.keys() if features[x]==0]
+    connectedSetList = []
+    while len(emptyPixels)>0:
+        fringe = []
+        connectedList = []
+        point = emptyPixels.pop()
+        fringe.append(point)
+        while(len(fringe)>0):
+            p = fringe.pop()
+            connectedList.append(p)
+            for n in [(p[0]-1, p[1]),(p[0]+1, p[1]),
+                         (p[0], p[1]-1),(p[0], p[1]+1)]:
+                if n in emptyPixels:
+                    emptyPixels.remove(n)
+                    fringe.append(n)
+        connectedSetList.append(connectedList)
+    features['connected1'] = 1 if len(connectedSetList) == 1 else 0
+    features['connected2'] = 1 if len(connectedSetList) == 2 else 0
+    features['connected3'] = 1 if len(connectedSetList) == 3 else 0
+    # util.raiseNotDefined()
 
     return features
 
